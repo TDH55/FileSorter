@@ -5,21 +5,25 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"syscall"
 	"time"
 )
 
 const tmpDir = "/Users/taylorhoward"
 
 type File struct {
-	Info fs.FileInfo
-	Path string
+	Info  fs.FileInfo
+	Path  string
+	cTime int64
 }
 
-//TODO: make this retunr an array of the file type
-//TODO: make this take in an array of strings for the extensions
+//cone: make this retunr an array of the file type
+//done: make this take in an array of strings for the extensions
 func getFiles(path string, extensions []string) []File {
 	var returnFiles []File
 
@@ -28,10 +32,6 @@ func getFiles(path string, extensions []string) []File {
 
 		fileExt := filepath.Ext(path + "/" + file.Name())
 
-		fileObject := File{
-			Info: file,
-			Path: path + "/" + file.Name(),
-		}
 		for _, extension := range extensions {
 			if fileExt == extension {
 				//TODO: change this to add to slice, add from slice to folder in a different func
@@ -50,6 +50,16 @@ func getFiles(path string, extensions []string) []File {
 				//}
 				//break
 
+				var st syscall.Stat_t
+				if err := syscall.Stat(path+"/"+file.Name(), &st); err != nil {
+					log.Fatal(err)
+				}
+
+				fileObject := File{
+					Info:  file,
+					Path:  path + "/" + file.Name(),
+					cTime: st.Ctimespec.Sec,
+				}
 				returnFiles = append(returnFiles, fileObject)
 				break
 			}
@@ -63,7 +73,7 @@ func getFiles(path string, extensions []string) []File {
 		//}
 
 		if file.IsDir() {
-			getFiles(path+"/"+file.Name(), extensions)
+			returnFiles = append(returnFiles, getFiles(path+"/"+file.Name(), extensions)...)
 		}
 	}
 
@@ -71,31 +81,60 @@ func getFiles(path string, extensions []string) []File {
 }
 
 func sortFiles(sortMethod string, files []File) []File {
-	var sortedFiles []File
-
+	//var sortedFiles []File
+	fmt.Println(sortMethod)
+	fmt.Println(len(files))
 	switch sortMethod {
 	case "size asc":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Size() < files[j].Info.Size()
+		})
+		break
 	case "size desc":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Size() > files[j].Info.Size()
+		})
+		break
 	case "name A-Z":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Name() < files[j].Info.Name()
+		})
+		break
 	case "name Z-A":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Name() > files[j].Info.Name()
+		})
+		break
 	case "newest":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].cTime > files[j].cTime
+		})
+		break
 	case "oldest":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].cTime < files[j].cTime
+		})
+		break
 	case "modification (newest first)":
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.ModTime().After(files[j].Info.ModTime())
+		})
+		break
 
 	case "modification (oldest first)":
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.ModTime().Before(files[j].Info.ModTime())
+		})
+		break
 	default:
 		fmt.Println("something went wrong... sorting alphabetically by default")
-
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Name() < files[j].Info.Name()
+		})
+		break
 	}
 
-	return sortedFiles
+	return files
 }
 
 func main() {
@@ -129,7 +168,7 @@ func main() {
 		}
 	}
 
-	//TODO: Ask for new folder location
+	//done: Ask for new folder location
 	fmt.Println("enter the directory for the sorted folder")
 	var folderDir string
 	for {
@@ -137,7 +176,7 @@ func main() {
 		folderDir = strings.Replace(folderDir, "\n", "", -1)
 
 		if file, err := os.Stat(folderDir); err == nil && file.IsDir() {
-			//TODO: create folder
+			//done: create folder
 			currentTime := time.Now()
 			fmt.Println(currentTime.Format("01-02-2006 15:04:05"))
 			fmt.Println(time.Now())
@@ -156,7 +195,7 @@ func main() {
 		}
 	}
 
-	//TODO: ask for sort method
+	//done: ask for sort method
 	fmt.Println("How would you like to sort yoru files?")
 	fmt.Println("1. Size (ascending)")
 	fmt.Println("2. Size (descending")
@@ -228,11 +267,13 @@ func main() {
 		}
 	}
 
-	//TODO: get array of files
+	//done: get slice of files
 	files := getFiles(rootDir, exts)
 
-	//TODO: sort array
+	fmt.Println(len(files))
+	//done: sort slice
 	files = sortFiles(sortMethod, files)
+	fmt.Println("here")
 
 	//TODO: copy files to directory
 
