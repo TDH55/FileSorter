@@ -70,16 +70,35 @@ func getFiles(path string, extensions []string) []File {
 	return returnFiles
 }
 
-func sortFiles(sortMethod string, files map[fs.FileInfo]string) []string {
-	var sortedFiles []string
+func sortFiles(sortMethod string, files []File) []File {
+	var sortedFiles []File
+
+	switch sortMethod {
+	case "size asc":
+
+	case "size desc":
+
+	case "name A-Z":
+
+	case "name Z-A":
+
+	case "newest":
+
+	case "oldest":
+
+	case "modification (newest first)":
+
+	case "modification (oldest first)":
+
+	default:
+		fmt.Println("something went wrong... sorting alphabetically by default")
+
+	}
 
 	return sortedFiles
 }
 
 func main() {
-	// var extensions [] string
-	// var rootPath string
-	// var newDirPath string
 	reader := bufio.NewReader(os.Stdin)
 
 	//Done: Ask for file type (ext)
@@ -137,11 +156,84 @@ func main() {
 		}
 	}
 
+	//TODO: ask for sort method
+	fmt.Println("How would you like to sort yoru files?")
+	fmt.Println("1. Size (ascending)")
+	fmt.Println("2. Size (descending")
+	fmt.Println("3. Name (A-Z)")
+	fmt.Println("4. Name (Z-A)")
+	fmt.Println("5. Date Created (newest)")
+	fmt.Println("6. Date Created (oldest)")
+	fmt.Println("7. Date Modified (most recent)")
+	fmt.Println("8. Date Modified (least recent)")
+
+	var sortMethod string
+	for {
+		var shouldBreak = false
+		//done: get input, prompt again if invalid
+		//TODO: make this so you dont have to click enter
+		char, _, err := reader.ReadRune()
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		switch char {
+		case '1':
+			fmt.Println("1 pressed")
+			sortMethod = "size asc"
+			shouldBreak = true
+			break
+		case '2':
+			fmt.Println("2 pressed")
+			sortMethod = "size desc"
+			shouldBreak = true
+			break
+		case '3':
+			fmt.Println("3 pressed")
+			sortMethod = "name A-Z"
+			shouldBreak = true
+			break
+		case '4':
+			fmt.Println("4 pressed")
+			sortMethod = "name Z-A"
+			shouldBreak = true
+			break
+		case '5':
+			fmt.Println("5 pressed")
+			sortMethod = "newest"
+			shouldBreak = true
+			break
+		case '6':
+			fmt.Println("6 pressed")
+			sortMethod = "oldest"
+			shouldBreak = true
+			break
+		case '7':
+			fmt.Println("7 pressed")
+			sortMethod = "modification (newest first)"
+			shouldBreak = true
+			break
+		case '8':
+			fmt.Println("8 pressed")
+			sortMethod = "modification (oldest first)"
+			shouldBreak = true
+			break
+		default:
+			fmt.Println("Invalid input, please try again")
+		}
+
+		if shouldBreak {
+			break
+		}
+	}
+
 	//TODO: get array of files
 	files := getFiles(rootDir, exts)
-	_ = files
 
 	//TODO: sort array
+	files = sortFiles(sortMethod, files)
 
 	//TODO: copy files to directory
+
 }
