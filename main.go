@@ -137,6 +137,21 @@ func sortFiles(sortMethod string, files []File) []File {
 	return files
 }
 
+func copyFiles(files []File, destination string) {
+	for _, file := range files {
+		data, err := ioutil.ReadFile(file.Path)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = ioutil.WriteFile(destination+"/"+file.Info.Name(), data, 0777)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -219,42 +234,34 @@ func main() {
 
 		switch char {
 		case '1':
-			fmt.Println("1 pressed")
 			sortMethod = "size asc"
 			shouldBreak = true
 			break
 		case '2':
-			fmt.Println("2 pressed")
 			sortMethod = "size desc"
 			shouldBreak = true
 			break
 		case '3':
-			fmt.Println("3 pressed")
 			sortMethod = "name A-Z"
 			shouldBreak = true
 			break
 		case '4':
-			fmt.Println("4 pressed")
 			sortMethod = "name Z-A"
 			shouldBreak = true
 			break
 		case '5':
-			fmt.Println("5 pressed")
 			sortMethod = "newest"
 			shouldBreak = true
 			break
 		case '6':
-			fmt.Println("6 pressed")
 			sortMethod = "oldest"
 			shouldBreak = true
 			break
 		case '7':
-			fmt.Println("7 pressed")
 			sortMethod = "modification (newest first)"
 			shouldBreak = true
 			break
 		case '8':
-			fmt.Println("8 pressed")
 			sortMethod = "modification (oldest first)"
 			shouldBreak = true
 			break
@@ -270,11 +277,10 @@ func main() {
 	//done: get slice of files
 	files := getFiles(rootDir, exts)
 
-	fmt.Println(len(files))
 	//done: sort slice
 	files = sortFiles(sortMethod, files)
-	fmt.Println("here")
 
 	//TODO: copy files to directory
+	copyFiles(files, folderDir)
 
 }
