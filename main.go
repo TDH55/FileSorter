@@ -82,37 +82,35 @@ func getFiles(path string, extensions []string) []File {
 
 func sortFiles(sortMethod string, files []File) []File {
 	//var sortedFiles []File
-	fmt.Println(sortMethod)
-	fmt.Println(len(files))
 	switch sortMethod {
 	case "size asc":
-		sort.Slice(files, func(i, j int) bool {
-			return files[i].Info.Size() < files[j].Info.Size()
-		})
-		break
-	case "size desc":
 		sort.Slice(files, func(i, j int) bool {
 			return files[i].Info.Size() > files[j].Info.Size()
 		})
 		break
-	case "name A-Z":
+	case "size desc":
 		sort.Slice(files, func(i, j int) bool {
-			return files[i].Info.Name() < files[j].Info.Name()
+			return files[i].Info.Size() < files[j].Info.Size()
 		})
 		break
-	case "name Z-A":
+	case "name A-Z":
 		sort.Slice(files, func(i, j int) bool {
 			return files[i].Info.Name() > files[j].Info.Name()
 		})
 		break
+	case "name Z-A":
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Info.Name() < files[j].Info.Name()
+		})
+		break
 	case "newest":
 		sort.Slice(files, func(i, j int) bool {
-			return files[i].cTime > files[j].cTime
+			return files[i].cTime < files[j].cTime
 		})
 		break
 	case "oldest":
 		sort.Slice(files, func(i, j int) bool {
-			return files[i].cTime < files[j].cTime
+			return files[i].cTime > files[j].cTime
 		})
 		break
 	case "modification (newest first)":
@@ -160,7 +158,6 @@ func main() {
 	args, _ := reader.ReadString('\n')
 	args = strings.Replace(args, "\n", "", -1)
 
-	fmt.Println(args)
 	//done: parse input into slice
 	exts := strings.Split(args, " ")
 
@@ -211,7 +208,7 @@ func main() {
 	}
 
 	//done: ask for sort method
-	fmt.Println("How would you like to sort yoru files?")
+	fmt.Println("How would you like to sort your files?")
 	fmt.Println("1. Size (ascending)")
 	fmt.Println("2. Size (descending")
 	fmt.Println("3. Name (A-Z)")
